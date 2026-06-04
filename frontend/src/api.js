@@ -1,7 +1,7 @@
 // src/api.js
 import axios from "axios"
 
-const BASE = "https://rag-chatbot-frjz.onrender.com"
+const BASE = "https://rag-chatbot-r6s7.onrender.com"
 
 export const uploadPDF = async (file) => {
   const form = new FormData()
