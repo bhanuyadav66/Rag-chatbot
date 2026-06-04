@@ -1,13 +1,7 @@
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from ingest import get_embeddings
 
 CHROMA_PATH = "./chroma_db"
-
-def get_embeddings():
-    return HuggingFaceEmbeddings(
-        model_name="all-MiniLM-L6-v2",
-        model_kwargs={"device": "cpu"}
-    )
 
 def get_retriever(session_id: str, k: int = 4):
     vectorstore = Chroma(
