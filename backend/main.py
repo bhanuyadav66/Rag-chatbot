@@ -1,13 +1,10 @@
-# backend/main.py
-
 import os, uuid, shutil, json, re
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from ingest import ingest_pdf
-from chain import build_chain
-from langchain_ollama import OllamaLLM
+from chain import build_chain, _make_llm, _text
 from langchain_community.document_loaders import PyPDFLoader
 
 app = FastAPI()
@@ -21,7 +18,7 @@ app.add_middleware(
 
 UPLOAD_DIR = "./uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-sessions: dict = {}          # session_id → RAGChain
+sessions: dict = {}
 
 
 def generate_suggestions(file_path: str) -> list:
@@ -29,19 +26,16 @@ def generate_suggestions(file_path: str) -> list:
         loader  = PyPDFLoader(file_path)
         pages   = loader.load()
         preview = " ".join(p.page_content for p in pages[:3])[:2000]
-        llm     = OllamaLLM(model="llama3.2", temperature=0.3)
-        prompt  = f"""Read this excerpt and write exactly 3 short questions a reader would ask.
-Return ONLY a valid JSON array, nothing else.
-Example: ["What is X?", "How does Y work?", "What are the Z?"]
+        llm     = _make_llm()
+        prompt  = f"""Read this excerpt. Write exactly 3 short questions a reader would ask.
+Return ONLY a JSON array. Example: ["Q1?", "Q2?", "Q3?"]
 
 Excerpt: {preview}
 
 JSON:"""
-        response = llm.invoke(prompt)
+        response = _text(llm.invoke(prompt))
         match    = re.search(r'\[.*?\]', response, re.DOTALL)
-        if match:
-            return json.loads(match.group())
-        return []
+        return json.loads(match.group()) if match else []
     except Exception as e:
         print(f"Suggestion error: {e}")
         return []
@@ -63,10 +57,10 @@ async def upload_pdf(file: UploadFile = File(...)):
     suggestions = generate_suggestions(save_path)
 
     return {
-        "session_id":         session_id,
-        "filename":           file.filename,
-        "chunks_indexed":     result["chunks_indexed"],
-        "pages_loaded":       result["pages_loaded"],
+        "session_id":          session_id,
+        "filename":            file.filename,
+        "chunks_indexed":      result["chunks_indexed"],
+        "pages_loaded":        result["pages_loaded"],
         "suggested_questions": suggestions
     }
 
