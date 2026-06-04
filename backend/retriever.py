@@ -1,12 +1,15 @@
 from langchain_chroma import Chroma
-from langchain_ollama import OllamaEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 CHROMA_PATH = "./chroma_db"
 
 def get_retriever(session_id: str, k: int = 4):
 
     # Open the same ChromaDB collection that ingest.py created
-    embeddings = OllamaEmbeddings(model="nomic-embed-text")
+    embeddings = HuggingFaceEmbeddings(
+    model_name="all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"}
+)
 
     vectorstore = Chroma(
         persist_directory=CHROMA_PATH,

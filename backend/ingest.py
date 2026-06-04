@@ -1,7 +1,7 @@
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_ollama import OllamaEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from pypdf import PdfReader
 
 CHROMA_PATH = "./chroma_db"
@@ -28,7 +28,10 @@ def ingest_pdf(file_path: str, session_id: str) -> dict:
     print(f"Created {len(chunks)} chunks")
 
     # Step 3 — Embed and store
-    embeddings = OllamaEmbeddings(model="nomic-embed-text")
+    embeddings = HuggingFaceEmbeddings(
+    model_name="all-MiniLM-L6-v2",
+    model_kwargs={"device": "cpu"}
+)
     Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
