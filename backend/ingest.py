@@ -2,27 +2,31 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_core.embeddings import Embeddings
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 from typing import List
 
-class LocalEmbeddings(Embeddings):
+
+class FastEmbedEmbeddings(Embeddings):
     def __init__(self):
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.model = TextEmbedding("BAAI/bge-small-en-v1.5")
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        return self.model.encode(texts, convert_to_numpy=True).tolist()
+        return [e.tolist() for e in self.model.embed(texts)]
 
     def embed_query(self, text: str) -> List[float]:
-        return self.model.encode(text, convert_to_numpy=True).tolist()
+        return list(self.model.embed([text]))[0].tolist()
+
 
 CHROMA_PATH = "./chroma_db"
 
+
 def get_embeddings():
-    return LocalEmbeddings()
+    return FastEmbedEmbeddings()
+
 
 def ingest_pdf(file_path: str, session_id: str) -> dict:
     loader = PyPDFLoader(file_path)
-    pages  = loader.load()
+    pages = loader.load()
     print(f"Loaded {len(pages)} pages")
 
     splitter = RecursiveCharacterTextSplitter(
@@ -40,8 +44,8 @@ def ingest_pdf(file_path: str, session_id: str) -> dict:
     print(f"Stored in ChromaDB: {session_id}")
 
     return {
-        "session_id":     session_id,
+        "session_id": session_id,
         "chunks_indexed": len(chunks),
-        "pages_loaded":   len(pages),
-        "status":         "success"
+        "pages_loaded": len(pages),
+        "status": "success"
     }
