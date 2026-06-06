@@ -1,4 +1,5 @@
 import os, uuid, shutil, json, re
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -7,7 +8,16 @@ from ingest import ingest_pdf
 from chain import build_chain, _make_llm, _text
 from langchain_community.document_loaders import PyPDFLoader
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app):
+    print("Preloading fastembed model at startup...")
+    from ingest import get_embeddings
+    get_embeddings()
+    print("Fastembed model ready")
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

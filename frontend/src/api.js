@@ -6,7 +6,9 @@ const BASE = "https://rag-chatbot-r6s7.onrender.com"
 export const uploadPDF = async (file) => {
   const form = new FormData()
   form.append("file", file)
-  const res = await axios.post(`${BASE}/upload`, form)
+  const res = await axios.post(`${BASE}/upload`, form, {
+    timeout: 300000
+  })
   return res.data
 }
 
