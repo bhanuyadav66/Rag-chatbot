@@ -23,8 +23,8 @@ Answer:"""
 def _make_llm():
     if os.getenv("LLM_PROVIDER", "ollama") == "groq":
         from langchain_groq import ChatGroq
-        return ChatGroq(
-            model="llama3-8b-8192",
+return ChatGroq(
+    model="llama-3.1-8b-instant",
             temperature=0,
             groq_api_key=os.getenv("GROQ_API_KEY")
         )
