@@ -1,3 +1,5 @@
+# backend/chain.py
+
 import os
 from langchain_core.prompts import PromptTemplate
 from retriever import get_retriever
@@ -23,8 +25,8 @@ Answer:"""
 def _make_llm():
     if os.getenv("LLM_PROVIDER", "ollama") == "groq":
         from langchain_groq import ChatGroq
-return ChatGroq(
-    model="llama-3.1-8b-instant",
+        return ChatGroq(
+            model="llama-3.1-8b-instant",
             temperature=0,
             groq_api_key=os.getenv("GROQ_API_KEY")
         )
@@ -33,7 +35,6 @@ return ChatGroq(
 
 
 def _text(response) -> str:
-    """Groq returns AIMessage with .content; Ollama returns a plain string."""
     return response.content if hasattr(response, "content") else str(response)
 
 
