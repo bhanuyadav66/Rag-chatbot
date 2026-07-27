@@ -4,7 +4,7 @@ Chat with any PDF using AI. Upload a document, ask questions, and get
 grounded answers with page citations — powered by Retrieval-Augmented
 Generation (RAG).
 
-**Live demo:** [your-app.vercel.app](https://your-app.vercel.app)
+**Live demo:** [RAG CHATBOT](https://frontend-nine-gamma-15.vercel.app/)
 
 ---
 
